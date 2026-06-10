@@ -1,0 +1,6 @@
+{
+  "name": "NestIQ - Powered by Avodal",
+  "description": "A property rental management SaaS dashboard for Kenyan landlords, managing rental plots, units, tenants, rent collection, and calendar schedules.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
