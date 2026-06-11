@@ -1,7 +1,7 @@
 // FILE: src/pages/Units.tsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Filter, Plus, ChevronRight } from "lucide-react";
+import { Search, Filter, Plus, ChevronRight, Lock } from "lucide-react";
 import { useRentSystem } from "../context/RentSystemContext";
 import AddUnitForm from "../components/forms/AddUnitForm";
 import RentStatusBadge from "../components/ui/RentStatusBadge";
@@ -150,6 +150,7 @@ export default function Units() {
                   <th className="py-3 px-6">Floor Level</th>
                   <th className="py-3 px-6">Current Tenant</th>
                   <th className="py-3 px-6">Monthly Rent</th>
+                  <th className="py-3 px-6">Deposit</th>
                   <th className="py-3 px-6">Status</th>
                   <th className="py-3 px-6">Action</th>
                 </tr>
@@ -173,6 +174,16 @@ export default function Units() {
                         {unit.status === "occupied" && tenantObj ? tenantObj.name : <span className="text-slate-400 font-normal">N/A</span>}
                       </td>
                       <td className="py-3.5 px-6 font-bold text-slate-800">{formatKES(unit.monthlyRent)}</td>
+                      <td className="py-3.5 px-6">
+                        {unit.depositRequired ? (
+                          <div className="flex items-center gap-1.5 bg-amber-50 px-2 py-1 rounded text-[9px] w-fit">
+                            <Lock className="w-3 h-3 text-amber-600" />
+                            <span className="font-bold text-amber-800">{formatKES(unit.depositAmount)}</span>
+                          </div>
+                        ) : (
+                          <span className="text-slate-400 text-[9px] font-medium">None</span>
+                        )}
+                      </td>
                       <td className="py-3.5 px-6">
                         <RentStatusBadge status={unit.status} />
                       </td>

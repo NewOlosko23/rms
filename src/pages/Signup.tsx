@@ -3,25 +3,25 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Building2, ShieldCheck, Check } from "lucide-react";
 import { useRentSystem } from "../context/RentSystemContext";
+import { useConfirm } from "../context/ConfirmContext";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "",
     password: "",
-    confirmPassword: "",
     agree: false,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [success, setSuccess] = useState(false);
   const { login } = useRentSystem();
   const navigate = useNavigate();
+  const { showAlert } = useConfirm();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
+    if (!formData.agree) {
+      showAlert("warning", "Terms Required", "Please agree to the Terms of Service and Privacy Policy");
       return;
     }
     setSuccess(true);
@@ -35,11 +35,25 @@ export default function Signup() {
     }, 1500);
   };
 
+  const handleGoogleSignup = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Simulate Google sign-up
+    setSuccess(true);
+    setTimeout(() => {
+      login({
+        name: "George Oloo",
+        role: "Property Manager",
+        email: "manager@avodal.co.ke",
+      });
+      navigate("/dashboard");
+    }, 1500);
+  };
+
   return (
     <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4 font-sans">
       <div className="bg-white rounded-2xl shadow-xl overflow-hidden max-w-4xl w-full grid md:grid-cols-2">
         
-        {/* LEFT COLUMN: BRANDING */}
+        {/* LEFT COLUMN: BRANDING & ART */}
         <div className="hidden md:flex flex-col justify-between p-8 bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-800 text-white relative">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-505/20 via-transparent to-transparent"></div>
           
@@ -76,17 +90,23 @@ export default function Signup() {
               <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
                 <Check className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-slate-800">Account success!</h3>
-              <p className="text-xs text-slate-500">Creating your property vault. Directing to dashboard...</p>
+              <h3 className="text-lg font-bold text-slate-800">Account created!</h3>
+              <p className="text-xs text-slate-500">Setting up your property dashboard. Redirecting...</p>
             </div>
           ) : (
             <>
-              <div className="mb-6">
+              <div className="md:hidden flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold">
+                  N
+                </div>
+                <span className="font-bold text-lg text-slate-800">NestIQ</span>
+              </div>
+              <div className="mb-8">
                 <h3 className="text-xl font-bold text-slate-800 tracking-tight">Create your account</h3>
-                <p className="text-xs text-slate-400 mt-1">Get started with our Kenyan rental management suite.</p>
+                <p className="text-xs text-slate-400 mt-1">Join thousands of property managers managing rentals seamlessly</p>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-3.5">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Full name */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">Full name</label>
@@ -95,8 +115,8 @@ export default function Signup() {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g. George Oloo"
-                    className="w-full text-xs px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-indigo-500 focus:bg-white font-medium"
+                    placeholder="George Oloo"
+                    className="w-full text-xs px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-indigo-500 focus:bg-white focus:border-indigo-500 transition-all font-medium"
                   />
                 </div>
 
@@ -108,52 +128,35 @@ export default function Signup() {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="e.g. oloo@avodal.co.ke"
-                    className="w-full text-xs px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-indigo-500 focus:bg-white font-medium"
+                    placeholder="oloo@avodal.co.ke"
+                    className="w-full text-xs px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-indigo-500 focus:bg-white focus:border-indigo-500 transition-all font-medium"
                   />
                 </div>
 
-                {/* Phone number */}
+                {/* Password */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Phone Number</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="e.g. +254 712 345678"
-                    className="w-full text-xs px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-indigo-500 focus:bg-white font-medium"
-                  />
-                </div>
-
-                {/* Passwords */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Password</label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Password</label>
+                  <div className="relative">
                     <input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       required
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       placeholder="••••••••"
-                      className="w-full text-xs px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-indigo-500 focus:bg-white font-medium"
+                      className="w-full text-xs px-3.5 py-3 pr-10 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-indigo-500 focus:bg-white focus:border-indigo-500 transition-all font-medium"
                     />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Confirm password</label>
-                    <input
-                      type="password"
-                      required
-                      value={formData.confirmPassword}
-                      onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                      placeholder="••••••••"
-                      className="w-full text-xs px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-indigo-500 focus:bg-white font-medium"
-                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
                 </div>
 
                 {/* Agree to terms */}
-                <label className="flex items-center gap-2 pt-1 cursor-pointer select-none">
+                <label className="flex items-center gap-2 py-1 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     required
@@ -169,24 +172,52 @@ export default function Signup() {
                 {/* Sign up button */}
                 <button
                   type="submit"
-                  className="w-full cursor-pointer py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-lg transition-colors mt-2"
+                  className="w-full cursor-pointer py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl shadow-xs hover:shadow-indigo-500/10 transition-all"
                 >
-                  Create NestIQ Account
+                  Create Account
                 </button>
               </form>
 
+              {/* Divider */}
+              <div className="relative my-6 flex items-center justify-center">
+                <div className="absolute inset-0 border-t border-slate-100"></div>
+                <span className="relative px-3 bg-white text-[10px] text-slate-400 font-bold uppercase tracking-wider font-mono">
+                  or continue with
+                </span>
+              </div>
+
+              {/* Google SSO */}
+              <button
+                type="button"
+                onClick={handleGoogleSignup}
+                className="w-full flex items-center justify-center gap-2.5 py-2.5 border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-600 font-semibold text-xs transition-colors cursor-pointer"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                Sign up with Google
+              </button>
+
               {/* Redirect to login */}
-              <p className="text-center text-xs text-slate-500 mt-6">
+              <p className="text-center text-xs text-slate-500 mt-8">
                 Already have an account?{" "}
                 <Link to="/login" className="font-semibold text-indigo-600 hover:underline">
                   Sign in
                 </Link>
               </p>
 
-              <div className="mt-6 text-center border-t border-slate-100 pt-3">
-                <span className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider font-mono">
+              <div className="mt-8 text-center border-t border-slate-100 pt-4">
+                <a
+                  href="https://avodal.co.ke"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[10px] text-slate-400 font-semibold hover:text-indigo-600 transition-colors"
+                >
                   Powered by Avodal
-                </span>
+                </a>
               </div>
             </>
           )}

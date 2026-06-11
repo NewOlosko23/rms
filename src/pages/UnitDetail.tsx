@@ -1,8 +1,9 @@
 // FILE: src/pages/UnitDetail.tsx
 import React, { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, User, MapPin, Layers, DollarSign, FileText, Sparkles, UserX, CreditCard } from "lucide-react";
+import { ArrowLeft, User, MapPin, Layers, DollarSign, FileText, Sparkles, UserX, CreditCard, Lock } from "lucide-react";
 import { useRentSystem } from "../context/RentSystemContext";
+import { useConfirm } from "../context/ConfirmContext";
 import RentStatusBadge from "../components/ui/RentStatusBadge";
 import Avatar from "../components/ui/Avatar";
 import { formatKES, formatDate, formatMonthYear } from "../data/helpers";
@@ -11,6 +12,7 @@ export default function UnitDetail() {
   const { id } = useParams<{ id: string }>();
   const { units, locations, tenants, rentRecords, vacateTenant } = useRentSystem();
   const navigate = useNavigate();
+  const { showConfirm, showAlert } = useConfirm();
 
   const unit = units.find((u) => u.id === id);
   const [adminNotes, setAdminNotes] = useState(
@@ -40,12 +42,20 @@ export default function UnitDetail() {
     .filter((r) => r.unitId === unit.id)
     .sort((a, b) => b.month.localeCompare(a.month));
 
-  const handleVacate = () => {
-    if (window.confirm(`Are you absolutely sure you want to mark Unit ${unit.id} as Vacant? This will sign out the resident ${tenant?.name}.`)) {
-      if (tenant) {
-        vacateTenant(tenant.id);
-        navigate("/units");
-      }
+  const handleVacate = async () => {
+    const confirmed = await showConfirm({
+      type: "confirm",
+      title: "Vacate Unit?",
+      message: `Are you sure you want to mark Unit ${unit.id} as Vacant? This will remove ${tenant?.name} and clear their lease information.`,
+      confirmLabel: "Vacate Unit",
+      cancelLabel: "Cancel",
+      isDanger: true,
+    });
+
+    if (confirmed && tenant) {
+      vacateTenant(tenant.id);
+      await showAlert("success", "Unit Vacated", `Unit ${unit.id} has been marked as vacant.`);
+      navigate("/units");
     }
   };
 
@@ -129,6 +139,47 @@ export default function UnitDetail() {
             )}
           </div>
 
+          {/* Deposit Info Card */}
+          <div className={`rounded-xl border p-4 space-y-3 ${
+            unit.depositRequired
+              ? "bg-amber-50 border-amber-200/60"
+              : "bg-slate-50 border-slate-200/60"
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Lock className={`w-4 h-4 ${unit.depositRequired ? "text-amber-600" : "text-slate-400"}`} />
+                <span className={`text-xs font-bold ${unit.depositRequired ? "text-amber-900" : "text-slate-600"}`}>
+                  {unit.depositRequired ? "Deposit Required" : "No Deposit"}
+                </span>
+              </div>
+              {unit.depositRequired && (
+                <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+                  Enabled
+                </span>
+              )}
+            </div>
+            {unit.depositRequired && (
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <span className={`text-[9px] font-semibold ${unit.depositRequired ? "text-amber-700/70" : "text-slate-600/70"}`}>
+                    Amount
+                  </span>
+                  <p className={`text-sm font-bold mt-0.5 ${unit.depositRequired ? "text-amber-900" : "text-slate-700"}`}>
+                    {formatKES(unit.depositAmount)}
+                  </p>
+                </div>
+                <div>
+                  <span className={`text-[9px] font-semibold ${unit.depositRequired ? "text-amber-700/70" : "text-slate-600/70"}`}>
+                    (1x Monthly Rent)
+                  </span>
+                  <p className={`text-[10px] mt-0.5 ${unit.depositRequired ? "text-amber-700" : "text-slate-600"}`}>
+                    per lease
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Admin Private Scratchpad Notes */}
           <div className="bg-white rounded-xl border border-slate-200/80 shadow-xs p-6 space-y-3">
             <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-1.5">
@@ -143,7 +194,7 @@ export default function UnitDetail() {
             />
             <button
               onClick={() => {
-                alert("Notes scratchpad saved into local cache!");
+                showAlert("success", "Saved", "Notes scratchpad saved into local cache!");
               }}
               className="w-full cursor-pointer py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-lg transition-colors"
             >

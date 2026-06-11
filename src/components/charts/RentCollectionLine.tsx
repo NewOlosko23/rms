@@ -36,7 +36,7 @@ export default function RentCollectionLine({ data }: RentCollectionLineProps) {
               tickLine={false}
             />
             <Tooltip 
-              formatter={(value: any, name: string) => [`${value}%`, name === "occupancyRate" ? "Occupancy" : "Collection Rate"]}
+              formatter={(value: any, name: string) => [`${value}%`, name]}
               contentStyle={{ background: "#FFF", borderRadius: "8px", border: "1px solid #E2E8F0" }}
             />
             <Legend 

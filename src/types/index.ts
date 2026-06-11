@@ -19,6 +19,8 @@ export interface Unit {
   status: "occupied" | "vacant";
   floor: number;
   tenantId: string | null;
+  depositRequired: boolean;    // Whether this unit requires deposit
+  depositAmount?: number;      // Cached at unit level (one month rent)
 }
 
 export interface Tenant {
@@ -34,6 +36,9 @@ export interface Tenant {
   emergencyContact: string;
   emergencyPhone: string;
   avatar: string;
+  depositPaid: boolean;
+  depositPaidDate: string | null;
+  depositRecordId: string | null;
 }
 
 export interface RentRecord {
@@ -63,6 +68,9 @@ export interface SystemSettings {
   latePaymentFee: number;
   enableLatePaymentFee: boolean; // Optional parameter
   lateFeeLocationIds: string[]; // Decided per property plot
+  enableDeposits: boolean;
+  depositFeeLocationIds: string[];
+  depositRefundGraceDays: number;
   mpesaTill: string;
   gracePeriodDays: number;
   enableSmsReminders: boolean;
@@ -87,4 +95,20 @@ export interface CalendarEvent {
   tenantName?: string;
   unitId?: string;
   details?: string;
+}
+
+export interface DepositRecord {
+  id: string;
+  tenantId: string;
+  unitId: string;
+  locationId: string;
+  amount: number;              // Always equals one month's rent at move-in
+  paidDate: string | null;     // When tenant paid deposit (ISO date)
+  status: "pending" | "held" | "refunded" | "repair_deducted" | "rent_applied";
+  deductionAmount: number;     // For repair deductions
+  deductionReason: string;     // Damage description
+  refundDate: string | null;   // When refund was processed
+  refundAmount: number;        // Amount refunded (may be less than original)
+  vacationDate: string | null; // When tenant vacated
+  createdDate: string;
 }

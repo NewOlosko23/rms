@@ -1,13 +1,14 @@
 // FILE: src/context/RentSystemContext.tsx
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { Location, Unit, Tenant, RentRecord, Activity, CalendarEvent, SystemSettings, SystemNotification } from "../types";
+import { Location, Unit, Tenant, RentRecord, Activity, CalendarEvent, SystemSettings, SystemNotification, DepositRecord } from "../types";
 import {
   LOCATIONS,
   INITIAL_UNITS,
   INITIAL_TENANTS,
   INITIAL_RENT_RECORDS,
   INITIAL_ACTIVITIES,
-  INITIAL_CALENDAR_EVENTS
+  INITIAL_CALENDAR_EVENTS,
+  INITIAL_DEPOSIT_RECORDS
 } from "../data/mockData";
 
 interface RentSystemContextType {
@@ -15,6 +16,7 @@ interface RentSystemContextType {
   units: Unit[];
   tenants: Tenant[];
   rentRecords: RentRecord[];
+  depositRecords: DepositRecord[];
   activities: Activity[];
   calendarEvents: CalendarEvent[];
   settings: SystemSettings;
@@ -33,6 +35,9 @@ interface RentSystemContextType {
   addNotification: (message: string, type: SystemNotification["type"], tenantName?: string, unitId?: string) => void;
   markNotificationsRead: () => void;
   simulateMpesaPayment: (tenantId: string, amount: number, transactionCode: string) => boolean;
+  processDepositRefund: (recordId: string, refundAmount: number) => void;
+  processRepairDeduction: (recordId: string, deductionAmount: number, reason: string) => void;
+  applyDepositToRent: (recordId: string) => void;
 }
 
 const RentSystemContext = createContext<RentSystemContextType | undefined>(undefined);
@@ -43,6 +48,9 @@ const DEFAULT_SETTINGS: SystemSettings = {
   latePaymentFee: 1000,
   enableLatePaymentFee: true,
   lateFeeLocationIds: ["loc-1", "loc-2"], // Default applicable to first two properties
+  enableDeposits: true,
+  depositFeeLocationIds: ["loc-1", "loc-2"], // Deposits only for Milele Court & Bahari (not Savannah Heights)
+  depositRefundGraceDays: 7,
   mpesaTill: "5431201",
   gracePeriodDays: 5,
   enableSmsReminders: true,
@@ -82,6 +90,7 @@ export function RentSystemProvider({ children }: { children: React.ReactNode }) 
   const [units, setUnits] = useState<Unit[]>([]);
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [rentRecords, setRentRecords] = useState<RentRecord[]>([]);
+  const [depositRecords, setDepositRecords] = useState<DepositRecord[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [settings, setSettings] = useState<SystemSettings>(DEFAULT_SETTINGS);
@@ -94,6 +103,7 @@ export function RentSystemProvider({ children }: { children: React.ReactNode }) 
     const storedUnits = localStorage.getItem("nest_iq_units");
     const storedTenants = localStorage.getItem("nest_iq_tenants");
     const storedRentRecords = localStorage.getItem("nest_iq_rent_records");
+    const storedDepositRecords = localStorage.getItem("nest_iq_deposit_records");
     const storedActivities = localStorage.getItem("nest_iq_activities");
     const storedEvents = localStorage.getItem("nest_iq_events");
     const storedSettings = localStorage.getItem("nest_iq_settings");
@@ -103,6 +113,7 @@ export function RentSystemProvider({ children }: { children: React.ReactNode }) 
     setUnits(storedUnits ? JSON.parse(storedUnits) : INITIAL_UNITS);
     setTenants(storedTenants ? JSON.parse(storedTenants) : INITIAL_TENANTS);
     setRentRecords(storedRentRecords ? JSON.parse(storedRentRecords) : INITIAL_RENT_RECORDS);
+    setDepositRecords(storedDepositRecords ? JSON.parse(storedDepositRecords) : INITIAL_DEPOSIT_RECORDS);
     setActivities(storedActivities ? JSON.parse(storedActivities) : INITIAL_ACTIVITIES);
     setCalendarEvents(storedEvents ? JSON.parse(storedEvents) : INITIAL_CALENDAR_EVENTS);
     setSettings(storedSettings ? JSON.parse(storedSettings) : DEFAULT_SETTINGS);
@@ -116,17 +127,20 @@ export function RentSystemProvider({ children }: { children: React.ReactNode }) 
     updatedTenants: Tenant[],
     updatedRentRecords: RentRecord[],
     updatedActivities: Activity[],
-    updatedEvents: CalendarEvent[]
+    updatedEvents: CalendarEvent[],
+    updatedDepositRecords?: DepositRecord[]
   ) => {
     setUnits(updatedUnits);
     setTenants(updatedTenants);
     setRentRecords(updatedRentRecords);
+    if (updatedDepositRecords) setDepositRecords(updatedDepositRecords);
     setActivities(updatedActivities);
     setCalendarEvents(updatedEvents);
 
     localStorage.setItem("nest_iq_units", JSON.stringify(updatedUnits));
     localStorage.setItem("nest_iq_tenants", JSON.stringify(updatedTenants));
     localStorage.setItem("nest_iq_rent_records", JSON.stringify(updatedRentRecords));
+    if (updatedDepositRecords) localStorage.setItem("nest_iq_deposit_records", JSON.stringify(updatedDepositRecords));
     localStorage.setItem("nest_iq_activities", JSON.stringify(updatedActivities));
     localStorage.setItem("nest_iq_events", JSON.stringify(updatedEvents));
   };
@@ -427,6 +441,125 @@ export function RentSystemProvider({ children }: { children: React.ReactNode }) 
     return true;
   };
 
+  // Process Deposit Refund
+  const processDepositRefund = (recordId: string, refundAmount: number) => {
+    const deposit = depositRecords.find((d) => d.id === recordId);
+    if (!deposit) return;
+
+    const tenant = tenants.find((t) => t.id === deposit.tenantId);
+    if (!tenant) return;
+
+    const updatedDeposits = depositRecords.map((d) =>
+      d.id === recordId
+        ? {
+            ...d,
+            status: "refunded" as const,
+            refundAmount,
+            refundDate: new Date().toISOString().split("T")[0],
+          }
+        : d
+    );
+
+    const newActivity: Activity = {
+      id: `act-${Date.now()}`,
+      type: "payment",
+      message: `Deposit refund processed — ${tenant.name} refunded KES ${refundAmount.toLocaleString()} (held: ${deposit.amount.toLocaleString()})`,
+      timestamp: new Date().toISOString(),
+      category: "green",
+    };
+
+    saveState(
+      units,
+      tenants,
+      rentRecords,
+      [newActivity, ...activities],
+      calendarEvents,
+      updatedDeposits
+    );
+
+    addNotification(`Deposit refund of KES ${refundAmount.toLocaleString()} processed for ${tenant.name}`, "info", tenant.name, tenant.unitId);
+  };
+
+  // Process Repair Deduction
+  const processRepairDeduction = (recordId: string, deductionAmount: number, reason: string) => {
+    const deposit = depositRecords.find((d) => d.id === recordId);
+    if (!deposit) return;
+
+    const tenant = tenants.find((t) => t.id === deposit.tenantId);
+    if (!tenant) return;
+
+    const refundAmount = Math.max(0, deposit.amount - deductionAmount);
+
+    const updatedDeposits = depositRecords.map((d) =>
+      d.id === recordId
+        ? {
+            ...d,
+            status: "repair_deducted" as const,
+            deductionAmount,
+            deductionReason: reason,
+            refundAmount,
+            refundDate: new Date().toISOString().split("T")[0],
+          }
+        : d
+    );
+
+    const newActivity: Activity = {
+      id: `act-${Date.now()}`,
+      type: "payment",
+      message: `Repair deduction applied to deposit — ${tenant.name} deducted KES ${deductionAmount.toLocaleString()} for: ${reason} (refund due: ${refundAmount.toLocaleString()})`,
+      timestamp: new Date().toISOString(),
+      category: "orange",
+    };
+
+    saveState(
+      units,
+      tenants,
+      rentRecords,
+      [newActivity, ...activities],
+      calendarEvents,
+      updatedDeposits
+    );
+
+    addNotification(`Repair deduction of KES ${deductionAmount.toLocaleString()} applied to ${tenant.name}'s deposit`, "info", tenant.name, tenant.unitId);
+  };
+
+  // Apply Deposit to Rent
+  const applyDepositToRent = (recordId: string) => {
+    const deposit = depositRecords.find((d) => d.id === recordId);
+    if (!deposit) return;
+
+    const tenant = tenants.find((t) => t.id === deposit.tenantId);
+    if (!tenant) return;
+
+    const updatedDeposits = depositRecords.map((d) =>
+      d.id === recordId
+        ? {
+            ...d,
+            status: "rent_applied" as const,
+          }
+        : d
+    );
+
+    const newActivity: Activity = {
+      id: `act-${Date.now()}`,
+      type: "payment",
+      message: `Deposit applied to rent — ${tenant.name}'s held deposit of KES ${deposit.amount.toLocaleString()} applied as rent payment`,
+      timestamp: new Date().toISOString(),
+      category: "indigo",
+    };
+
+    saveState(
+      units,
+      tenants,
+      rentRecords,
+      [newActivity, ...activities],
+      calendarEvents,
+      updatedDeposits
+    );
+
+    addNotification(`Deposit of KES ${deposit.amount.toLocaleString()} applied to ${tenant.name}'s rent account`, "info", tenant.name, tenant.unitId);
+  };
+
   return (
     <RentSystemContext.Provider
       value={{
@@ -434,6 +567,7 @@ export function RentSystemProvider({ children }: { children: React.ReactNode }) 
         units,
         tenants,
         rentRecords,
+        depositRecords,
         activities,
         calendarEvents,
         settings,
@@ -452,6 +586,9 @@ export function RentSystemProvider({ children }: { children: React.ReactNode }) 
         addNotification,
         markNotificationsRead,
         simulateMpesaPayment,
+        processDepositRefund,
+        processRepairDeduction,
+        applyDepositToRent,
       }}
     >
       {children}

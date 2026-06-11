@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight, Clock, Plus, CalendarDays, AlertCircle } from "lucide-react";
 import { useRentSystem } from "../context/RentSystemContext";
+import { useConfirm } from "../context/ConfirmContext";
 import Avatar from "../components/ui/Avatar";
 import { formatDate } from "../data/helpers";
 
@@ -16,6 +17,7 @@ interface EventFormData {
 
 export default function Calendar() {
   const { calendarEvents, units } = useRentSystem();
+  const { showAlert } = useConfirm();
   
   // Hardcoded date focus for demonstration is June 2026
   const [currentYear, setCurrentYear] = useState(2026);
@@ -93,7 +95,7 @@ export default function Calendar() {
     });
     localStorage.setItem("nest_iq_events", JSON.stringify(calendarEvents));
 
-    alert(`Event booked: "${newEvent.title}" on ${newEvent.date}!`);
+    showAlert("success", "Event Created", `Event "${newEvent.title}" has been scheduled for ${newEvent.date}!`);
     setShowAddEventModal(false);
     // reset form
     setNewEvent({

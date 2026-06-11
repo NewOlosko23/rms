@@ -11,6 +11,9 @@ export default function Settings() {
     latePaymentFee: 1000,
     enableLatePaymentFee: true,
     lateFeeLocationIds: [] as string[],
+    enableDeposits: true,
+    depositFeeLocationIds: [] as string[],
+    depositRefundGraceDays: 7,
     mpesaTill: "",
     gracePeriodDays: 5,
     enableSmsReminders: true,
@@ -29,6 +32,9 @@ export default function Settings() {
         latePaymentFee: settings.latePaymentFee ?? 1000,
         enableLatePaymentFee: settings.enableLatePaymentFee ?? true,
         lateFeeLocationIds: settings.lateFeeLocationIds || [],
+        enableDeposits: settings.enableDeposits ?? true,
+        depositFeeLocationIds: settings.depositFeeLocationIds || [],
+        depositRefundGraceDays: settings.depositRefundGraceDays ?? 7,
         mpesaTill: settings.mpesaTill || "5431201",
         gracePeriodDays: settings.gracePeriodDays ?? 5,
         enableSmsReminders: settings.enableSmsReminders ?? true,
@@ -43,6 +49,14 @@ export default function Settings() {
       ? current.filter(id => id !== locId)
       : [...current, locId];
     setFormData({ ...formData, lateFeeLocationIds: next });
+  };
+
+  const handleDepositLocationToggle = (locId: string) => {
+    const current = formData.depositFeeLocationIds || [];
+    const next = current.includes(locId)
+      ? current.filter(id => id !== locId)
+      : [...current, locId];
+    setFormData({ ...formData, depositFeeLocationIds: next });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -224,6 +238,98 @@ export default function Settings() {
             <p className="text-[10px] text-slate-400 mt-1 font-semibold">
               Customers receive immediate receipt hooks via the Avodal SMS router upon matching Till transfers.
             </p>
+          </div>
+        </div>
+
+        {/* ROW 2B: SECURITY DEPOSIT MANAGEMENT */}
+        <div className="bg-white p-6 rounded-xl border border-slate-200/85 shadow-xs space-y-5">
+          <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2 border-b border-slate-100 pb-3">
+            <CreditCard className="w-4.5 h-4.5 text-amber-600" />
+            Tenant Security Deposits
+          </h3>
+
+          {/* GLOBAL DEPOSIT TOGGLE SWITCH */}
+          <div className="flex items-center justify-between p-4 bg-slate-50/50 rounded-xl border border-slate-100/80">
+            <div>
+              <h4 className="font-bold text-slate-800 text-xs">Enable Deposit Collection</h4>
+              <p className="text-[10px] text-slate-400 mt-0.5 font-medium">
+                When enabled, tenants will be required to pay one month's rent as a security deposit on move-in.
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={formData.enableDeposits}
+                onChange={(e) => setFormData({ ...formData, enableDeposits: e.target.checked })}
+                className="sr-only peer"
+              />
+              <div className="w-9 h-5 bg-slate-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-indigo-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-slate-350 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
+            </label>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-slate-600 mb-1 flex items-center justify-between">
+                <span>Deposit Refund Grace Period (Days)</span>
+                {!formData.enableDeposits && <span className="text-[9px] text-rose-500 font-bold uppercase tracking-wider">Deactivated</span>}
+              </label>
+              <input
+                type="number"
+                disabled={!formData.enableDeposits}
+                value={formData.depositRefundGraceDays}
+                onChange={(e) => setFormData({ ...formData, depositRefundGraceDays: parseInt(e.target.value) || 0 })}
+                className={`w-full text-xs p-2.5 border rounded-lg font-mono font-bold focus:outline-hidden ${
+                  formData.enableDeposits 
+                    ? "bg-slate-50 border-slate-200 focus:bg-white text-slate-800" 
+                    : "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
+                }`}
+              />
+              <p className="text-[10px] text-slate-400 mt-1">Days before automatic refund processing after tenant vacation</p>
+            </div>
+          </div>
+
+          {/* SPECIFIC PROPERTIES DELEGATION FOR DEPOSITS */}
+          <div className="pt-2 border-t border-slate-100">
+            <h4 className={`text-xs font-bold ${formData.enableDeposits ? "text-slate-700" : "text-slate-400"}`}>
+              Select Applicable Properties (Plots)
+            </h4>
+            <p className="text-[10px] text-slate-400 mt-0.5 font-medium mb-3">
+              Check the properties where deposit collection should be enforced. Unchecked properties will not require deposits.
+            </p>
+
+            <div className={`grid grid-cols-1 sm:grid-cols-3 gap-3 ${formData.enableDeposits ? "" : "opacity-50 pointer-events-none"}`}>
+              {locations.map((loc) => {
+                const isChecked = formData.depositFeeLocationIds?.includes(loc.id);
+                return (
+                  <button
+                    key={loc.id}
+                    type="button"
+                    onClick={() => formData.enableDeposits && handleDepositLocationToggle(loc.id)}
+                    className={`flex items-center justify-between p-3 border rounded-xl text-left cursor-pointer transition-all ${
+                      isChecked
+                        ? "bg-amber-50/50 border-amber-200 text-amber-700 shadow-2xs"
+                        : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
+                    }`}
+                  >
+                    <div>
+                      <p className="text-xs font-bold leading-tight">{loc.name}</p>
+                      <p className="text-[9px] text-slate-400 font-medium leading-none mt-1">KES {loc.monthlyRent.toLocaleString()} deposit</p>
+                    </div>
+                    <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all ${
+                      isChecked 
+                        ? "bg-amber-600 border-amber-500 text-white" 
+                        : "border-slate-300 bg-slate-50"
+                    }`}>
+                      {isChecked && (
+                        <svg className="w-2.5 h-2.5 fill-none stroke-current stroke-3" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 

@@ -1,7 +1,9 @@
 // FILE: src/layouts/DashboardLayout.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate, Outlet } from "react-router-dom";
 import { useRentSystem } from "../context/RentSystemContext";
+import { useAuth } from "../context/AuthContext";
+import { useConfirm } from "../context/ConfirmContext";
 import {
   LayoutDashboard,
   MapPin,
@@ -22,7 +24,8 @@ import {
   AlertCircle,
   CheckCircle2,
   Info,
-  User
+  User,
+  HelpCircle
 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -37,7 +40,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem("sidebar_collapsed") === "true");
   const location = useLocation();
   const navigate = useNavigate();
+  const mainContentRef = useRef<HTMLMainElement>(null);
   const { notifications, markNotificationsRead, globalSearchQuery, setGlobalSearchQuery } = useRentSystem();
+  const { user, logout } = useAuth();
+  const { showConfirm } = useConfirm();
+
+  // Scroll to top when route changes
+  useEffect(() => {
+    if (mainContentRef.current) {
+      setTimeout(() => {
+        if (mainContentRef.current) {
+          mainContentRef.current.scrollTop = 0;
+        }
+      }, 50);
+    }
+  }, [location.pathname]);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
@@ -58,6 +75,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const handleToggleMobileProfile = () => {
     setMobileProfileOpen(!mobileProfileOpen);
     setNotificationsOpen(false);
+  };
+
+  // Handle global search
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (globalSearchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(globalSearchQuery)}`);
+    }
+  };
+
+  // Handle Enter key in search input
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch(e as any);
+    }
   };
 
   // Navigation Items
@@ -89,19 +121,26 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     pageTitle = "Reports & Analytics";
   } else if (currentPath.startsWith("/settings")) {
     pageTitle = "Account Settings";
+  } else if (currentPath.startsWith("/help")) {
+    pageTitle = "Help & Support";
   }
 
   // Handle Logout
-  const handleLogout = () => {
-    localStorage.removeItem("nest_iq_logged_in");
-    localStorage.removeItem("nest_iq_user");
-    navigate("/login");
-  };
+  const handleLogout = async () => {
+    const confirmed = await showConfirm({
+      type: "confirm",
+      title: "Sign Out?",
+      message: "Are you sure you want to sign out? You will need to log in again to access your account.",
+      confirmLabel: "Sign Out",
+      cancelLabel: "Cancel",
+      isDanger: true,
+    });
 
-  const user = JSON.parse(
-    localStorage.getItem("nest_iq_user") || 
-    '{"name":"George Oloo","role":"Property Manager","email":"oloogeorge633@gmail.com"}'
-  );
+    if (confirmed) {
+      logout();
+      navigate("/login", { replace: true });
+    }
+  };
 
   return (
     <div className="h-screen w-screen bg-slate-50 flex flex-col md:flex-row font-sans overflow-hidden">
@@ -179,50 +218,35 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           })}
         </nav>
 
-        {/* MANAGER PROFILE CARD */}
-        <div className={`border-t border-slate-200 bg-slate-50/50 mt-auto transition-all duration-300 ${sidebarCollapsed ? "p-3 flex justify-center" : "p-4"}`}>
-          {sidebarCollapsed ? (
-            <div className="relative group flex flex-col items-center gap-2">
-              <button
-                onClick={handleToggleDesktopProfile}
-                className="w-10 h-10 rounded-full bg-indigo-600/10 text-indigo-700 flex items-center justify-center font-bold font-mono border border-indigo-100 hover:bg-indigo-600/20 transition-colors cursor-pointer"
-                id="user-profile-menu-button-collapsed"
-              >
-                GO
-              </button>
-              <button
-                onClick={handleLogout}
-                className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-200 hover:text-rose-600 transition-all cursor-pointer"
-                title="Sign Out"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
+        {/* SIDEBAR FOOTER */}
+        <div className={`border-t border-slate-200 bg-slate-50/50 mt-auto transition-all duration-300 ${sidebarCollapsed ? "p-3" : "p-4"}`}>
+          {/* Help Link */}
+          <Link
+            to="/help"
+            className={`flex items-center rounded-lg text-sm font-medium transition-all duration-200 mb-3 text-slate-600 hover:bg-slate-100 hover:text-slate-900 ${
+              sidebarCollapsed ? "justify-center h-10 w-10 mx-auto" : "px-3.5 py-2.5 gap-3"
+            }`}
+            title={sidebarCollapsed ? "Help" : ""}
+          >
+            <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {!sidebarCollapsed && <span className="truncate">Help & Support</span>}
+          </Link>
 
-              {/* Tooltip for profile & logout */}
-              <div className="absolute left-[64px] bottom-12 bg-slate-900 text-white text-[11px] font-bold px-3 py-2 rounded-lg shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-150 pointer-events-none z-50 whitespace-nowrap">
-                <p className="font-bold text-white">{user.name}</p>
-                <p className="text-[10px] text-slate-400 font-medium leading-tight mt-0.5">{user.role}</p>
-                <div className="absolute right-full bottom-6 border-[5px] border-transparent border-r-slate-900"></div>
+          {/* Copyright & Terms */}
+          <div className={`border-t border-slate-200 pt-3 ${sidebarCollapsed ? "text-center" : ""}`}>
+            <p className="text-[10px] text-slate-400 font-mono leading-tight">
+              {sidebarCollapsed ? "© 2026" : "© 2026 NestIQ by Avodal"}
+            </p>
+            {!sidebarCollapsed && (
+              <div className="flex gap-2 mt-1.5">
+                <a href="#" className="text-[9px] text-indigo-500 hover:text-indigo-600 font-medium">Privacy</a>
+                <span className="text-[9px] text-slate-300">•</span>
+                <a href="#" className="text-[9px] text-indigo-500 hover:text-indigo-600 font-medium">Terms</a>
               </div>
-            </div>
-          ) : (
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-indigo-600/10 text-indigo-700 flex items-center justify-center font-bold font-mono">
-                GO
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-slate-800 truncate">{user.name}</p>
-                <p className="text-xs text-slate-500 truncate">{user.role}</p>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition-colors cursor-pointer"
-                title="Sign Out"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </aside>
 
@@ -411,27 +435,36 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Search Input Placeholder */}
-            <div className="relative w-64">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            {/* Search Input */}
+            <form onSubmit={handleSearch} className="relative w-64">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Search rentals, tenants, units..."
                 value={globalSearchQuery}
                 onChange={(e) => setGlobalSearchQuery(e.target.value)}
-                className="w-full text-xs pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-colors"
+                onKeyDown={handleSearchKeyDown}
+                className="w-full text-xs pl-9 pr-10 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-colors"
                 id="header-global-search-input"
               />
-              {globalSearchQuery && (
+              {globalSearchQuery ? (
                 <button
                   type="button"
                   onClick={() => setGlobalSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-hidden text-xs font-bold font-sans"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-hidden text-xs font-bold font-sans p-1"
                 >
                   ✕
                 </button>
+              ) : (
+                <button
+                  type="submit"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-500 focus:outline-hidden transition-colors p-1"
+                  title="Search"
+                >
+                  <Search className="w-4 h-4" />
+                </button>
               )}
-            </div>
+            </form>
 
             {/* Notification Bell */}
             <div className="relative">
@@ -538,7 +571,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       <LogOut className="w-4 h-4" />
                       Sign Out
                     </button>
-                  </div>
+              </div>
                 </div>
               )}
             </div>
@@ -546,7 +579,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </header>
 
         {/* PAGE CONTENT CONTAINER */}
-        <main className="flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto overflow-y-auto">
+        <main ref={mainContentRef} className="flex-1 p-4 md:p-8 max-w-full w-full mx-auto overflow-y-auto">
           {children || <Outlet />}
         </main>
       </div>

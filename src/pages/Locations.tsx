@@ -1,13 +1,33 @@
 // FILE: src/pages/Locations.tsx
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MapPin, Building2, Home, ArrowRight, Plus } from "lucide-react";
 import { useRentSystem } from "../context/RentSystemContext";
+import { useConfirm } from "../context/ConfirmContext";
 import { formatKES } from "../data/helpers";
+import AddPropertyForm from "../components/forms/AddPropertyForm";
 
 export default function Locations() {
-  const { locations, units } = useRentSystem();
+  const { locations, units, addUnit } = useRentSystem();
   const navigate = useNavigate();
+  const { showAlert } = useConfirm();
+  const [showAddPropertyModal, setShowAddPropertyModal] = useState(false);
+
+  const handleAddProperty = (propertyData: any) => {
+    // Create units for the new property (basic setup)
+    for (let i = 1; i <= Math.min(propertyData.totalUnits, 3); i++) {
+      addUnit({
+        locationId: `loc-${Date.now()}`,
+        unitNumber: i.toString(),
+        type: propertyData.type,
+        monthlyRent: propertyData.monthlyRent,
+        floor: Math.ceil(i / 3),
+      });
+    }
+    setShowAddPropertyModal(false);
+    // In a real app, this would call a context method to add the property
+    showAlert("success", "Property Added", "Property added successfully! Note: Full property management requires backend integration.");
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -18,10 +38,10 @@ export default function Locations() {
           <p className="text-xs text-slate-400 mt-1">Manage Siaya plot directories and unit capacities</p>
         </div>
         <button
-          onClick={() => alert("This feature is disabled on the read-only demo. You can registration-expand individual suites in the Units tab.")}
-          className="inline-flex items-center gap-2 cursor-pointer px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold text-xs rounded-xl shadow-xs hover:bg-slate-50 transition-all font-mono"
+          onClick={() => setShowAddPropertyModal(true)}
+          className="inline-flex items-center gap-2 cursor-pointer px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 border border-indigo-600 text-white font-semibold text-xs rounded-xl shadow-xs hover:shadow-indigo-500/20 transition-all font-mono"
         >
-          <Plus className="w-4 h-4 text-slate-500" />
+          <Plus className="w-4 h-4" />
           Add Property Plot
         </button>
       </div>
@@ -107,7 +127,12 @@ export default function Locations() {
           );
         })}
       </div>
-
-    </div>
+      {/* Add Property Modal */}
+      {showAddPropertyModal && (
+        <AddPropertyForm
+          onSave={handleAddProperty}
+          onClose={() => setShowAddPropertyModal(false)}
+        />
+      )}    </div>
   );
 }

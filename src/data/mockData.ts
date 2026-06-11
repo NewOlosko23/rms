@@ -1,6 +1,22 @@
 // FILE: src/data/mockData.ts
 import { Location, Unit, Tenant, RentRecord, Activity, CalendarEvent } from "../types";
 
+// Admin user credentials (single admin only)
+export const ADMIN_USER = {
+  id: "admin-001",
+  email: "manager@avodal.co.ke",
+  password: "SecurePassword123!", // In production, use hashed passwords
+  name: "George Oloo",
+  phone: "+254712345678",
+  role: "Admin",
+  company: "Avodal Properties",
+  avatar: "https://i.pravatar.cc/150?img=1",
+  createdAt: "2026-01-01",
+  lastLogin: "2026-06-11",
+  permissions: ["view_all", "manage_all", "export", "settings"],
+  isActive: true
+};
+
 export const LOCATIONS: Location[] = [
   {
     id: "loc-1",
@@ -34,30 +50,30 @@ export const LOCATIONS: Location[] = [
 // Helper to generate units
 export const INITIAL_UNITS: Unit[] = [
   // Milele Court (10 units: 8 occupied, 2 vacant)
-  { id: "MC-01", locationId: "loc-1", unitNumber: "A1", type: "Bedsitter", monthlyRent: 3500, status: "occupied", floor: 1, tenantId: "tenant-1" },
-  { id: "MC-02", locationId: "loc-1", unitNumber: "A2", type: "Bedsitter", monthlyRent: 3500, status: "occupied", floor: 1, tenantId: "tenant-2" },
-  { id: "MC-03", locationId: "loc-1", unitNumber: "A3", type: "Bedsitter", monthlyRent: 3500, status: "occupied", floor: 1, tenantId: "tenant-3" },
-  { id: "MC-04", locationId: "loc-1", unitNumber: "B1", type: "Bedsitter", monthlyRent: 3500, status: "occupied", floor: 2, tenantId: "tenant-4" },
-  { id: "MC-05", locationId: "loc-1", unitNumber: "B2", type: "Bedsitter", monthlyRent: 3500, status: "occupied", floor: 2, tenantId: "tenant-5" },
-  { id: "MC-06", locationId: "loc-1", unitNumber: "B3", type: "Bedsitter", monthlyRent: 3500, status: "occupied", floor: 2, tenantId: "tenant-6" },
-  { id: "MC-07", locationId: "loc-1", unitNumber: "C1", type: "Bedsitter", monthlyRent: 3500, status: "occupied", floor: 3, tenantId: "tenant-7" },
-  { id: "MC-08", locationId: "loc-1", unitNumber: "C2", type: "Bedsitter", monthlyRent: 3500, status: "occupied", floor: 3, tenantId: "tenant-8" },
-  { id: "MC-09", locationId: "loc-1", unitNumber: "C3", type: "Bedsitter", monthlyRent: 3500, status: "vacant", floor: 3, tenantId: null },
-  { id: "MC-10", locationId: "loc-1", unitNumber: "D1", type: "Bedsitter", monthlyRent: 3500, status: "vacant", floor: 4, tenantId: null },
+  { id: "MC-01", locationId: "loc-1", unitNumber: "A1", type: "Bedsitter", monthlyRent: 3500, status: "occupied", floor: 1, tenantId: "tenant-1", depositRequired: true, depositAmount: 3500 },
+  { id: "MC-02", locationId: "loc-1", unitNumber: "A2", type: "Bedsitter", monthlyRent: 3500, status: "occupied", floor: 1, tenantId: "tenant-2", depositRequired: true, depositAmount: 3500 },
+  { id: "MC-03", locationId: "loc-1", unitNumber: "A3", type: "Bedsitter", monthlyRent: 3500, status: "occupied", floor: 1, tenantId: "tenant-3", depositRequired: true, depositAmount: 3500 },
+  { id: "MC-04", locationId: "loc-1", unitNumber: "B1", type: "Bedsitter", monthlyRent: 3500, status: "occupied", floor: 2, tenantId: "tenant-4", depositRequired: true, depositAmount: 3500 },
+  { id: "MC-05", locationId: "loc-1", unitNumber: "B2", type: "Bedsitter", monthlyRent: 3500, status: "occupied", floor: 2, tenantId: "tenant-5", depositRequired: true, depositAmount: 3500 },
+  { id: "MC-06", locationId: "loc-1", unitNumber: "B3", type: "Bedsitter", monthlyRent: 3500, status: "occupied", floor: 2, tenantId: "tenant-6", depositRequired: true, depositAmount: 3500 },
+  { id: "MC-07", locationId: "loc-1", unitNumber: "C1", type: "Bedsitter", monthlyRent: 3500, status: "occupied", floor: 3, tenantId: "tenant-7", depositRequired: true, depositAmount: 3500 },
+  { id: "MC-08", locationId: "loc-1", unitNumber: "C2", type: "Bedsitter", monthlyRent: 3500, status: "occupied", floor: 3, tenantId: "tenant-8", depositRequired: true, depositAmount: 3500 },
+  { id: "MC-09", locationId: "loc-1", unitNumber: "C3", type: "Bedsitter", monthlyRent: 3500, status: "vacant", floor: 3, tenantId: null, depositRequired: true, depositAmount: 3500 },
+  { id: "MC-10", locationId: "loc-1", unitNumber: "D1", type: "Bedsitter", monthlyRent: 3500, status: "vacant", floor: 4, tenantId: null, depositRequired: true, depositAmount: 3500 },
 
   // Bahari Residences (5 units: 4 occupied, 1 vacant)
-  { id: "BR-01", locationId: "loc-2", unitNumber: "101", type: "1 Bedroom", monthlyRent: 8500, status: "occupied", floor: 1, tenantId: "tenant-9" },
-  { id: "BR-02", locationId: "loc-2", unitNumber: "102", type: "1 Bedroom", monthlyRent: 8500, status: "occupied", floor: 1, tenantId: "tenant-10" },
-  { id: "BR-03", locationId: "loc-2", unitNumber: "201", type: "1 Bedroom", monthlyRent: 8500, status: "occupied", floor: 2, tenantId: "tenant-11" },
-  { id: "BR-04", locationId: "loc-2", unitNumber: "202", type: "1 Bedroom", monthlyRent: 8500, status: "occupied", floor: 2, tenantId: "tenant-12" },
-  { id: "BR-05", locationId: "loc-2", unitNumber: "301", type: "1 Bedroom", monthlyRent: 8500, status: "vacant", floor: 3, tenantId: null },
+  { id: "BR-01", locationId: "loc-2", unitNumber: "101", type: "1 Bedroom", monthlyRent: 8500, status: "occupied", floor: 1, tenantId: "tenant-9", depositRequired: true, depositAmount: 8500 },
+  { id: "BR-02", locationId: "loc-2", unitNumber: "102", type: "1 Bedroom", monthlyRent: 8500, status: "occupied", floor: 1, tenantId: "tenant-10", depositRequired: true, depositAmount: 8500 },
+  { id: "BR-03", locationId: "loc-2", unitNumber: "201", type: "1 Bedroom", monthlyRent: 8500, status: "occupied", floor: 2, tenantId: "tenant-11", depositRequired: true, depositAmount: 8500 },
+  { id: "BR-04", locationId: "loc-2", unitNumber: "202", type: "1 Bedroom", monthlyRent: 8500, status: "occupied", floor: 2, tenantId: "tenant-12", depositRequired: true, depositAmount: 8500 },
+  { id: "BR-05", locationId: "loc-2", unitNumber: "301", type: "1 Bedroom", monthlyRent: 8500, status: "vacant", floor: 3, tenantId: null, depositRequired: true, depositAmount: 8500 },
 
-  // Savannah Heights (5 units: 3 occupied, 2 vacant)
-  { id: "SH-01", locationId: "loc-3", unitNumber: "H01", type: "2 Bedroom", monthlyRent: 15000, status: "occupied", floor: 1, tenantId: "tenant-13" },
-  { id: "SH-02", locationId: "loc-3", unitNumber: "H02", type: "2 Bedroom", monthlyRent: 15000, status: "occupied", floor: 1, tenantId: "tenant-14" },
-  { id: "SH-03", locationId: "loc-3", unitNumber: "H03", type: "2 Bedroom", monthlyRent: 15000, status: "occupied", floor: 2, tenantId: "tenant-15" },
-  { id: "SH-04", locationId: "loc-3", unitNumber: "H04", type: "2 Bedroom", monthlyRent: 15000, status: "vacant", floor: 2, tenantId: null },
-  { id: "SH-05", locationId: "loc-3", unitNumber: "H05", type: "2 Bedroom", monthlyRent: 15000, status: "vacant", floor: 3, tenantId: null }
+  // Savannah Heights (5 units: 3 occupied, 2 vacant) - No deposits required
+  { id: "SH-01", locationId: "loc-3", unitNumber: "H01", type: "2 Bedroom", monthlyRent: 15000, status: "occupied", floor: 1, tenantId: "tenant-13", depositRequired: false, depositAmount: 0 },
+  { id: "SH-02", locationId: "loc-3", unitNumber: "H02", type: "2 Bedroom", monthlyRent: 15000, status: "occupied", floor: 1, tenantId: "tenant-14", depositRequired: false, depositAmount: 0 },
+  { id: "SH-03", locationId: "loc-3", unitNumber: "H03", type: "2 Bedroom", monthlyRent: 15000, status: "occupied", floor: 2, tenantId: "tenant-15", depositRequired: false, depositAmount: 0 },
+  { id: "SH-04", locationId: "loc-3", unitNumber: "H04", type: "2 Bedroom", monthlyRent: 15000, status: "vacant", floor: 2, tenantId: null, depositRequired: false, depositAmount: 0 },
+  { id: "SH-05", locationId: "loc-3", unitNumber: "H05", type: "2 Bedroom", monthlyRent: 15000, status: "vacant", floor: 3, tenantId: null, depositRequired: false, depositAmount: 0 }
 ];
 
 export const INITIAL_TENANTS: Tenant[] = [
@@ -73,7 +89,10 @@ export const INITIAL_TENANTS: Tenant[] = [
     leaseEndDate: "2025-03-14",
     emergencyContact: "John Odhiambo",
     emergencyPhone: "+254 722 000111",
-    avatar: "https://ui-avatars.com/api/?name=Akinyi+Odhiambo&background=4F46E5&color=fff"
+    avatar: "https://ui-avatars.com/api/?name=Akinyi+Odhiambo&background=4F46E5&color=fff",
+    depositPaid: true,
+    depositPaidDate: "2024-03-08",
+    depositRecordId: "dep-1"
   },
   {
     id: "tenant-2",
@@ -87,7 +106,10 @@ export const INITIAL_TENANTS: Tenant[] = [
     leaseEndDate: "2025-04-30",
     emergencyContact: "Grace Mwangi",
     emergencyPhone: "+254 715 222333",
-    avatar: "https://ui-avatars.com/api/?name=Otieno+Mwangi&background=10B981&color=fff"
+    avatar: "https://ui-avatars.com/api/?name=Otieno+Mwangi&background=10B981&color=fff",
+    depositPaid: true,
+    depositPaidDate: "2024-04-24",
+    depositRecordId: "dep-2"
   },
   {
     id: "tenant-3",
@@ -101,7 +123,10 @@ export const INITIAL_TENANTS: Tenant[] = [
     leaseEndDate: "2025-08-09",
     emergencyContact: "Peter Kamau",
     emergencyPhone: "+254 731 444555",
-    avatar: "https://ui-avatars.com/api/?name=Wanjiru+Kamau&background=F59E0B&color=fff"
+    avatar: "https://ui-avatars.com/api/?name=Wanjiru+Kamau&background=F59E0B&color=fff",
+    depositPaid: true,
+    depositPaidDate: "2024-08-03",
+    depositRecordId: "dep-3"
   },
   {
     id: "tenant-4",
@@ -115,7 +140,10 @@ export const INITIAL_TENANTS: Tenant[] = [
     leaseEndDate: "2025-11-19",
     emergencyContact: "Nancy Rotich",
     emergencyPhone: "+254 720 011222",
-    avatar: "https://ui-avatars.com/api/?name=Kipchoge+Rotich&background=EC4899&color=fff"
+    avatar: "https://ui-avatars.com/api/?name=Kipchoge+Rotich&background=EC4899&color=fff",
+    depositPaid: true,
+    depositPaidDate: "2024-11-13",
+    depositRecordId: "dep-4"
   },
   {
     id: "tenant-5",
@@ -129,7 +157,10 @@ export const INITIAL_TENANTS: Tenant[] = [
     leaseEndDate: "2026-01-04",
     emergencyContact: "Ahmed Hassan",
     emergencyPhone: "+254 711 999888",
-    avatar: "https://ui-avatars.com/api/?name=Amina+Hassan&background=8B5CF6&color=fff"
+    avatar: "https://ui-avatars.com/api/?name=Amina+Hassan&background=8B5CF6&color=fff",
+    depositPaid: true,
+    depositPaidDate: "2024-12-29",
+    depositRecordId: "dep-5"
   },
   {
     id: "tenant-6",
@@ -143,7 +174,10 @@ export const INITIAL_TENANTS: Tenant[] = [
     leaseEndDate: "2026-02-14",
     emergencyContact: "Beryl Nyamweya",
     emergencyPhone: "+254 702 333444",
-    avatar: "https://ui-avatars.com/api/?name=Ouma+Nyamweya&background=3B82F6&color=fff"
+    avatar: "https://ui-avatars.com/api/?name=Ouma+Nyamweya&background=3B82F6&color=fff",
+    depositPaid: true,
+    depositPaidDate: "2025-02-08",
+    depositRecordId: "dep-6"
   },
   {
     id: "tenant-7",
@@ -154,10 +188,13 @@ export const INITIAL_TENANTS: Tenant[] = [
     unitId: "MC-07",
     locationId: "loc-1",
     moveInDate: "2025-04-01",
-    leaseEndDate: "2026-06-30", // expiring soon, next 30 days
+    leaseEndDate: "2026-06-30",
     emergencyContact: "David Kosgei",
     emergencyPhone: "+254 716 555666",
-    avatar: "https://ui-avatars.com/api/?name=Chebet+Kosgei&background=14B8A6&color=fff"
+    avatar: "https://ui-avatars.com/api/?name=Chebet+Kosgei&background=14B8A6&color=fff",
+    depositPaid: true,
+    depositPaidDate: "2025-03-25",
+    depositRecordId: "dep-7"
   },
   {
     id: "tenant-8",
@@ -168,10 +205,13 @@ export const INITIAL_TENANTS: Tenant[] = [
     unitId: "MC-08",
     locationId: "loc-1",
     moveInDate: "2024-06-20",
-    leaseEndDate: "2025-06-19", // expiring soon (June 19, 2025 status)
+    leaseEndDate: "2025-06-19",
     emergencyContact: "Mary Kioko",
     emergencyPhone: "+254 735 999111",
-    avatar: "https://ui-avatars.com/api/?name=Mutua+Kioko&background=EF4444&color=fff"
+    avatar: "https://ui-avatars.com/api/?name=Mutua+Kioko&background=EF4444&color=fff",
+    depositPaid: true,
+    depositPaidDate: "2024-06-13",
+    depositRecordId: "dep-8"
   },
 
   // Bahari Residences (4 Tenants)
@@ -187,7 +227,10 @@ export const INITIAL_TENANTS: Tenant[] = [
     leaseEndDate: "2025-01-09",
     emergencyContact: "George Njeri",
     emergencyPhone: "+254 719 333222",
-    avatar: "https://ui-avatars.com/api/?name=Zawadi+Njeri&background=6366F1&color=fff"
+    avatar: "https://ui-avatars.com/api/?name=Zawadi+Njeri&background=6366F1&color=fff",
+    depositPaid: true,
+    depositPaidDate: "2024-01-03",
+    depositRecordId: "dep-9"
   },
   {
     id: "tenant-10",
@@ -201,7 +244,10 @@ export const INITIAL_TENANTS: Tenant[] = [
     leaseEndDate: "2025-12-31",
     emergencyContact: "Joseph Wafula",
     emergencyPhone: "+254 726 777888",
-    avatar: "https://ui-avatars.com/api/?name=Simiyu+Wafula&background=059669&color=fff"
+    avatar: "https://ui-avatars.com/api/?name=Simiyu+Wafula&background=059669&color=fff",
+    depositPaid: true,
+    depositPaidDate: "2024-08-25",
+    depositRecordId: "dep-10"
   },
   {
     id: "tenant-11",
@@ -215,7 +261,10 @@ export const INITIAL_TENANTS: Tenant[] = [
     leaseEndDate: "2026-02-28",
     emergencyContact: "Richard Onyango",
     emergencyPhone: "+254 742 888999",
-    avatar: "https://ui-avatars.com/api/?name=Akello+Onyango&background=7C3AED&color=fff"
+    avatar: "https://ui-avatars.com/api/?name=Akello+Onyango&background=7C3AED&color=fff",
+    depositPaid: true,
+    depositPaidDate: "2025-02-22",
+    depositRecordId: "dep-11"
   },
   {
     id: "tenant-12",
@@ -226,10 +275,13 @@ export const INITIAL_TENANTS: Tenant[] = [
     unitId: "BR-04",
     locationId: "loc-2",
     moveInDate: "2024-04-15",
-    leaseEndDate: "2025-07-14", // within 60 days
+    leaseEndDate: "2025-07-14",
     emergencyContact: "Tabitha Ndung'u",
     emergencyPhone: "+254 702 444333",
-    avatar: "https://ui-avatars.com/api/?name=Gathii+Ndungu&background=F43F5E&color=fff"
+    avatar: "https://ui-avatars.com/api/?name=Gathii+Ndungu&background=F43F5E&color=fff",
+    depositPaid: true,
+    depositPaidDate: "2024-04-08",
+    depositRecordId: "dep-12"
   },
 
   // Savannah Heights (3 Tenants)
@@ -245,7 +297,10 @@ export const INITIAL_TENANTS: Tenant[] = [
     leaseEndDate: "2025-01-31",
     emergencyContact: "Mohamed Abdi",
     emergencyPhone: "+254 721 555444",
-    avatar: "https://ui-avatars.com/api/?name=Halima+Abdi&background=06B6D4&color=fff"
+    avatar: "https://ui-avatars.com/api/?name=Halima+Abdi&background=06B6D4&color=fff",
+    depositPaid: false,
+    depositPaidDate: null,
+    depositRecordId: null
   },
   {
     id: "tenant-14",
@@ -259,7 +314,10 @@ export const INITIAL_TENANTS: Tenant[] = [
     leaseEndDate: "2025-09-30",
     emergencyContact: "Alice Oluoch",
     emergencyPhone: "+254 718 999000",
-    avatar: "https://ui-avatars.com/api/?name=Ochieng+Oluoch&background=10B981&color=fff"
+    avatar: "https://ui-avatars.com/api/?name=Ochieng+Oluoch&background=10B981&color=fff",
+    depositPaid: false,
+    depositPaidDate: null,
+    depositRecordId: null
   },
   {
     id: "tenant-15",
@@ -270,11 +328,34 @@ export const INITIAL_TENANTS: Tenant[] = [
     unitId: "SH-03",
     locationId: "loc-3",
     moveInDate: "2025-01-10",
-    leaseEndDate: "2025-07-20", // within 60 days
+    leaseEndDate: "2025-07-20",
     emergencyContact: "Ben Barasa",
     emergencyPhone: "+254 732 111222",
-    avatar: "https://ui-avatars.com/api/?name=Nafula+Barasa&background=D97706&color=fff"
+    avatar: "https://ui-avatars.com/api/?name=Nafula+Barasa&background=D97706&color=fff",
+    depositPaid: false,
+    depositPaidDate: null,
+    depositRecordId: null
   }
+];
+
+// Deposit Records (12 total - loc-1: 8, loc-2: 4. Savannah Heights (loc-3) has no deposits)
+// Sample variations: dep-2 (refunded), dep-10 (repair deduction)
+export const INITIAL_DEPOSIT_RECORDS: DepositRecord[] = [
+  // Milele Court deposits (3500 each)
+  { id: "dep-1", tenantId: "tenant-1", unitId: "MC-01", locationId: "loc-1", amount: 3500, paidDate: "2024-03-08", status: "held", deductionAmount: 0, deductionReason: "", refundDate: null, refundAmount: 0, vacationDate: null, createdDate: "2024-03-15" },
+  { id: "dep-2", tenantId: "tenant-2", unitId: "MC-02", locationId: "loc-1", amount: 3500, paidDate: "2024-04-24", status: "refunded", deductionAmount: 0, deductionReason: "", refundDate: "2026-05-25", refundAmount: 3500, vacationDate: "2026-05-20", createdDate: "2024-05-01" },
+  { id: "dep-3", tenantId: "tenant-3", unitId: "MC-03", locationId: "loc-1", amount: 3500, paidDate: "2024-08-03", status: "held", deductionAmount: 0, deductionReason: "", refundDate: null, refundAmount: 0, vacationDate: null, createdDate: "2024-08-10" },
+  { id: "dep-4", tenantId: "tenant-4", unitId: "MC-04", locationId: "loc-1", amount: 3500, paidDate: "2024-11-13", status: "held", deductionAmount: 0, deductionReason: "", refundDate: null, refundAmount: 0, vacationDate: null, createdDate: "2024-11-20" },
+  { id: "dep-5", tenantId: "tenant-5", unitId: "MC-05", locationId: "loc-1", amount: 3500, paidDate: "2024-12-29", status: "held", deductionAmount: 0, deductionReason: "", refundDate: null, refundAmount: 0, vacationDate: null, createdDate: "2025-01-05" },
+  { id: "dep-6", tenantId: "tenant-6", unitId: "MC-06", locationId: "loc-1", amount: 3500, paidDate: "2025-02-08", status: "held", deductionAmount: 0, deductionReason: "", refundDate: null, refundAmount: 0, vacationDate: null, createdDate: "2025-02-15" },
+  { id: "dep-7", tenantId: "tenant-7", unitId: "MC-07", locationId: "loc-1", amount: 3500, paidDate: "2025-03-25", status: "held", deductionAmount: 0, deductionReason: "", refundDate: null, refundAmount: 0, vacationDate: null, createdDate: "2025-04-01" },
+  { id: "dep-8", tenantId: "tenant-8", unitId: "MC-08", locationId: "loc-1", amount: 3500, paidDate: "2024-06-13", status: "held", deductionAmount: 0, deductionReason: "", refundDate: null, refundAmount: 0, vacationDate: null, createdDate: "2024-06-20" },
+
+  // Bahari Residences deposits (8500 each)
+  { id: "dep-9", tenantId: "tenant-9", unitId: "BR-01", locationId: "loc-2", amount: 8500, paidDate: "2024-01-03", status: "held", deductionAmount: 0, deductionReason: "", refundDate: null, refundAmount: 0, vacationDate: null, createdDate: "2024-01-10" },
+  { id: "dep-10", tenantId: "tenant-10", unitId: "BR-02", locationId: "loc-2", amount: 8500, paidDate: "2024-08-25", status: "repair_deducted", deductionAmount: 2000, deductionReason: "Wall damage in bedroom", refundDate: "2026-06-01", refundAmount: 6500, vacationDate: "2026-05-20", createdDate: "2024-09-01" },
+  { id: "dep-11", tenantId: "tenant-11", unitId: "BR-03", locationId: "loc-2", amount: 8500, paidDate: "2025-02-22", status: "held", deductionAmount: 0, deductionReason: "", refundDate: null, refundAmount: 0, vacationDate: null, createdDate: "2025-03-01" },
+  { id: "dep-12", tenantId: "tenant-12", unitId: "BR-04", locationId: "loc-2", amount: 8500, paidDate: "2024-04-08", status: "held", deductionAmount: 0, deductionReason: "", refundDate: null, refundAmount: 0, vacationDate: null, createdDate: "2024-04-15" }
 ];
 
 // We will simulate 6 months of rent payments (Jan 2026 to June 2026)

@@ -1,7 +1,7 @@
 // FILE: src/pages/Tenants.tsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Filter, Plus, ChevronRight, UserCheck } from "lucide-react";
+import { Search, Filter, Plus, ChevronRight, UserCheck, Lock } from "lucide-react";
 import { useRentSystem } from "../context/RentSystemContext";
 import AddTenantForm from "../components/forms/AddTenantForm";
 import RentStatusBadge from "../components/ui/RentStatusBadge";
@@ -132,6 +132,7 @@ export default function Tenants() {
                   <th className="py-3 px-6">Mobile Phone</th>
                   <th className="py-3 px-6">Move-In</th>
                   <th className="py-3 px-6">Lease Expiration</th>
+                  <th className="py-3 px-6">Deposit</th>
                   <th className="py-3 px-6">June Rent</th>
                   <th className="py-3 px-6">Actions</th>
                 </tr>
@@ -164,6 +165,19 @@ export default function Tenants() {
                       <td className="py-3.5 px-6 font-semibold text-slate-600">{ten.phone}</td>
                       <td className="py-3.5 px-6 text-slate-500 whitespace-nowrap">{formatDate(ten.moveInDate)}</td>
                       <td className="py-3.5 px-6 text-slate-500 whitespace-nowrap">{formatDate(ten.leaseEndDate)}</td>
+                      <td className="py-3.5 px-6">
+                        {ten.depositPaid ? (
+                          <div className="flex items-center gap-1 bg-emerald-50 px-2 py-1 rounded text-[9px] w-fit">
+                            <Lock className="w-3 h-3 text-emerald-600" />
+                            <span className="font-bold text-emerald-800">Paid</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded text-[9px] w-fit">
+                            <Lock className="w-3 h-3 text-yellow-600" />
+                            <span className="font-bold text-yellow-800">Pending</span>
+                          </div>
+                        )}
+                      </td>
                       <td className="py-3.5 px-6">
                         <RentStatusBadge status={rentStatus} />
                       </td>
