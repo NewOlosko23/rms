@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NestIQ - Mobile Responsive Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Custom scrollbar for better mobile feel */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        
+        /* Mobile specific adjustments */
+        @media (max-width: 768px) {
+            .mobile-sidebar { transform: translateX(-100%); transition: transform 0.3s ease-in-out; }
+            .mobile-sidebar.open { transform: translateX(0); }
+            .mobile-overlay { display: none; }
+            .mobile-overlay.open { display: block; }
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="mobile-overlay" onclick="toggleSidebar()" class="mobile-overlay fixed inset-0 bg-black/50 z-40 lg:hidden"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="mobile-sidebar fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col transition-transform duration-300 lg:transform-none">
+        <!-- Logo Area -->
+        <div class="h-16 flex items-center px-6 border-b border-slate-100">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-md">
+                    N
+                </div>
+                <span class="font-bold text-xl tracking-tight text-slate-900">NestIQ</span>
+            </div>
+            <!-- Mobile Close Button -->
+            <button onclick="toggleSidebar()" class="lg:hidden ml-auto text-slate-500 hover:text-slate-700">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 bg-indigo-50 text-indigo-600 rounded-lg text-sm font-medium transition-colors">
+                <i class="fas fa-home w-5 text-center"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg text-sm font-medium transition-colors">
+                <i class="fas fa-building w-5 text-center"></i>
+                <span>Locations</span>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg text-sm font-medium transition-colors">
+                <i class="fas fa-door-open w-5 text-center"></i>
+                <span>Units</span>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg text-sm font-medium transition-colors">
+                <i class="fas fa-users w-5 text-center"></i>
+                <span>Tenants</span>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg text-sm font-medium transition-colors">
+                <i class="fas fa-file-invoice-dollar w-5 text-center"></i>
+                <span>Rent Tracker</span>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg text-sm font-medium transition-colors">
+                <i class="fas fa-calendar-alt w-5 text-center"></i>
+                <span>Calendar</span>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg text-sm font-medium transition-colors">
+                <i class="fas fa-chart-pie w-5 text-center"></i>
+                <span>Reports</span>
+            </a>
+        </nav>
+
+        <!-- User Profile (Bottom) -->
+        <div class="p-4 border-t border-slate-100">
+            <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
+                <img src="https://ui-avatars.com/api/?name=Admin+User&background=6366f1&color=fff" alt="User" class="w-9 h-9 rounded-full object-cover ring-2 ring-white shadow-sm">
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-slate-900 truncate">Admin User</p>
+                    <p class="text-xs text-slate-500 truncate">admin@nestiq.com</p>
+                </div>
+                <i class="fas fa-chevron-right text-xs text-slate-400"></i>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <div class="flex-1 flex flex-col min-h-screen lg:ml-0 transition-all duration-300">
+        
+        <!-- Top Header -->
+        <header class="h-16 bg-white border-b border-slate-200 sticky top-0 z-30 flex items-center justify-between px-4 lg:px-8 shadow-sm">
+            <div class="flex items-center gap-4">
+                <!-- Mobile Menu Toggle -->
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+                    <i class="fas fa-bars text-lg"></i>
+                </button>
+                
+                <!-- Search Bar (Hidden on very small screens, visible on md+) -->
+                <div class="hidden md:flex items-center bg-slate-100 rounded-lg px-3 py-2 w-64 focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all">
+                    <i class="fas fa-search text-slate-400 text-sm"></i>
+                    <input type="text" placeholder="Search..." class="bg-transparent border-none outline-none text-sm ml-2 w-full text-slate-700 placeholder-slate-400">
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 lg:gap-4">
+                <button class="relative p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">
+                    <i class="fas fa-bell text-lg"></i>
+                    <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                </button>
+                <button class="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors hidden sm:block">
+                    <i class="fas fa-cog text-lg"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="flex-1 p-4 lg:p-8 overflow-y-auto">
+            
+            <!-- Page Title & Actions -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">Dashboard</h1>
+                    <p class="text-slate-500 text-sm mt-1">Overview of your property portfolio</p>
+                </div>
+                <button class="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm whitespace-nowrap">
+                    <i class="fas fa-plus text-sm"></i>
+                    <span>Add Property</span>
+                </button>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+                <!-- Stat Card 1 -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <p class="text-slate-500 text-xs font-medium uppercase tracking-wide">Total Revenue</p>
+                            <h3 class="text-2xl font-bold text-slate-900 mt-1">$45,231</h3>
+                        </div>
+                        <div class="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600">
+                            <i class="fas fa-dollar-sign text-lg"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-medium text-xs flex items-center gap-1">
+                            <i class="fas fa-arrow-up text-xs"></i> 12.5%
+                        </span>
+                        <span class="text-slate-400 text-xs">vs last month</span>
+                    </div>
+                </div>
+
+                <!-- Stat Card 2 -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <p class="text-slate-500 text-xs font-medium uppercase tracking-wide">Occupancy Rate</p>
+                            <h3 class="text-2xl font-bold text-slate-900 mt-1">94.2%</h3>
+                        </div>
+                        <div class="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600">
+                            <i class="fas fa-chart-line text-lg"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-medium text-xs flex items-center gap-1">
+                            <i class="fas fa-arrow-up text-xs"></i> 2.1%
+                        </span>
+                        <span class="text-slate-400 text-xs">vs last month</span>
+                    </div>
+                </div>
+
+                <!-- Stat Card 3 -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <p class="text-slate-500 text-xs font-medium uppercase tracking-wide">Active Tenants</p>
+                            <h3 class="text-2xl font-bold text-slate-900 mt-1">1,248</h3>
+                        </div>
+                        <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600">
+                            <i class="fas fa-users text-lg"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="text-slate-400 text-xs">Across 12 locations</span>
+                    </div>
+                </div>
+
+                <!-- Stat Card 4 -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <p class="text-slate-500 text-xs font-medium uppercase tracking-wide">Maintenance</p>
+                            <h3 class="text-2xl font-bold text-slate-900 mt-1">8</h3>
+                        </div>
+                        <div class="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center text-orange-600">
+                            <i class="fas fa-tools text-lg"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full font-medium text-xs flex items-center gap-1">
+                            <i class="fas fa-exclamation-circle text-xs"></i> 3 Urgent
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity / Table Section -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-8">
+                <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <h2 class="text-lg font-bold text-slate-900">Recent Rent Payments</h2>
+                    <div class="flex gap-2">
+                        <button class="px-3 py-1.5 text-sm font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">Filter</button>
+                        <button class="px-3 py-1.5 text-sm font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">Export</button>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-600">
+                        <thead class="bg-slate-50 text-xs uppercase font-semibold text-slate-500">
+                            <tr>
+                                <th class="px-6 py-4">Tenant</th>
+                                <th class="px-6 py-4">Property</th>
+                                <th class="px-6 py-4">Amount</th>
+                                <th class="px-6 py-4">Status</th>
+                                <th class="px-6 py-4">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-6 py-4 font-medium text-slate-900">Sarah Johnson</td>
+                                <td class="px-6 py-4">Sunset Apartments, Unit 4B</td>
+                                <td class="px-6 py-4">$1,200.00</td>
+                                <td class="px-6 py-4"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Paid</span></td>
+                                <td class="px-6 py-4">Oct 24, 2023</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-6 py-4 font-medium text-slate-900">Michael Chen</td>
+                                <td class="px-6 py-4">Oakwood Lofts, Unit 12A</td>
+                                <td class="px-6 py-4">$2,450.00</td>
+                                <td class="px-6 py-4"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Pending</span></td>
+                                <td class="px-6 py-4">Oct 23, 2023</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-6 py-4 font-medium text-slate-900">Emma Wilson</td>
+                                <td class="px-6 py-4">Highland View, Unit 7C</td>
+                                <td class="px-6 py-4">$1,850.00</td>
+                                <td class="px-6 py-4"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Paid</span></td>
+                                <td class="px-6 py-4">Oct 21, 2023</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Mobile Card View Alternative (Visible only on small screens) -->
+                <div class="sm:hidden p-4 space-y-4">
+                    <!-- Card 1 -->
+                    <div class="border border-slate-200 rounded-lg p-4 bg-slate-50">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-semibold text-slate-900">Sarah Johnson</span>
+                            <span class="text-xs font-medium text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full">Paid</span>
+                        </div>
+                        <p class="text-sm text-slate-600 mb-2">Sunset Apartments, Unit 4B</p>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="font-bold text-slate-900">$1,200.00</span>
+                            <span class="text-slate-500 text-xs">Oct 24</span>
+                        </div>
+                    </div>
+                    <!-- Card 2 -->
+                    <div class="border border-slate-200 rounded-lg p-4 bg-slate-50">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-semibold text-slate-900">Michael Chen</span>
+                            <span class="text-xs font-medium text-amber-700 bg-amber-100 px-2 py-1 rounded-full">Pending</span>
+                        </div>
+                        <p class="text-sm text-slate-600 mb-2">Oakwood Lofts, Unit 12A</p>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="font-bold text-slate-900">$2,450.00</span>
+                            <span class="text-slate-500 text-xs">Oct 23</span>
+                        </div>
+                    </div>
+                    <!-- Card 3 -->
+                    <div class="border border-slate-200 rounded-lg p-4 bg-slate-50">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-semibold text-slate-900">Emma Wilson</span>
+                            <span class="text-xs font-medium text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full">Paid</span>
+                        </div>
+                        <p class="text-sm text-slate-600 mb-2">Highland View, Unit 7C</p>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="font-bold text-slate-900">$1,850.00</span>
+                            <span class="text-slate-500 text-xs">Oct 21</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            
+            if (window.innerWidth < 1024) { // Only toggle on mobile/tablet
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('open');
+            }
+        }
+
+        // Handle resize events to reset state if moving from mobile to desktop
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024) {
+                document.getElementById('sidebar').classList.remove('open');
+                document.getElementById('mobile-overlay').classList.remove('open');
+            }
+        });
+    </script>
+</body>
+</html>

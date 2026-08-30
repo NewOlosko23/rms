@@ -2,65 +2,46 @@
 # Dependencies
 node_modules/
 
-# Logs and temp files
-*.log
-*.tmp
+# Build artifacts
+dist/
+build/
+target/
 
-# Environment
+# Environment variables
 .env
 .env.local
-.env.*
+*.env.*
 
-# Editors
+# IDE files
 .vscode/
 .idea/
+*.swp
+*.swo
+*.tmp
 
-# Python
+# Logs
+*.log
+
+# Python cache
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 
-# Build outputs
-dist/
-build/
-target/
+# Coverage reports
+coverage/
+htmlcov/
+.coverage
 
-# Compression files
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
+# Distribution / packaging
 *.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
+*.whl
+*.egg-info/
 
 # OS generated files
 .DS_Store
 Thumbs.db
 
-# Testing
-coverage/
-htmlcov/
-.coverage
-*.coverage
-
-# Package manager
-package-lock.json
-yarn.lock
+# Local configuration
+*.local
 ```
